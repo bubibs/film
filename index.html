@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestore Prove Termoformatura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .star-rating .star {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .star-rating .star.filled {
+            color: #f59e0b;
+        }
+        .icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-10">
+
+<div id="app" class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8 space-y-8">
+
+    <!-- Modulo per l'inserimento dei dati -->
+    <h1 class="text-3xl md:text-4xl font-bold text-center text-indigo-700">Gestore Prove Termoformatura</h1>
+    <p class="text-center text-gray-600">Inserisci i dati delle tue prove di termoformatura per analizzare i risultati e ricevere suggerimenti.</p>
+
+    <div id="form-container" class="bg-gray-100 p-6 rounded-lg shadow-inner">
+        <form id="film-form" class="space-y-4">
+            <div>
+                <label for="filmName" class="block text-sm font-medium text-gray-700">Nome film</label>
+                <div class="relative">
+                    <input type="text" id="filmName" name="filmName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pr-10" placeholder="Esempio: PET Trasparente">
+                    <button type="button" id="toggleFavorites" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 focus:outline-none">
+                        <svg id="favorite-icon-empty" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                        <svg id="favorite-icon-filled" class="h-6 w-6 text-red-500 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+                    </button>
+                </div>
+                <ul id="suggestions" class="bg-white border border-gray-300 rounded-md mt-1 max-h-40 overflow-y-auto hidden z-10"></ul>
+            </div>
+            <div class="flex flex-col md:flex-row md:space-x-4">
+                <div class="flex-1">
+                    <label for="composition" class="block text-sm font-medium text-gray-700">Composizione</label>
+                    <div class="relative mt-1">
+                        <input type="text" id="composition" name="composition" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Esempio: PET">
+                    </div>
+                </div>
+                <div class="flex-1 mt-4 md:mt-0">
+                    <label for="thickness" class="block text-sm font-medium text-gray-700">Spessore (µm)</label>
+                    <div class="relative mt-1">
+                        <input type="number" id="thickness" name="thickness" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Esempio: 500">
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row md:space-x-4">
+                <div class="flex-1">
+                    <label for="flexibility" class="block text-sm font-medium text-gray-700">Flessibilità</label>
+                    <div class="relative mt-1">
+                        <select id="flexibility" name="flexibility" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Seleziona...</option>
+                            <option value="Rigido">Rigido</option>
+                            <option value="Flessibile">Flessibile</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex-1 mt-4 md:mt-0">
+                    <label for="formingType" class="block text-sm font-medium text-gray-700">Tipo di Formatura</label>
+                    <div class="relative mt-1">
+                        <select id="formingType" name="formingType" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Seleziona...</option>
+                            <option value="Vacuum">Vacuum</option>
+                            <option value="Pressure">Pressure</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row md:space-x-4">
+                <div class="flex-1">
+                    <label for="temp" class="block text-sm font-medium text-gray-700">Temperatura (°C)</label>
+                    <div class="relative mt-1">
+                        <input type="number" id="temp" name="temp" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Esempio: 150">
+                    </div>
+                </div>
+                <div class="flex-1 mt-4 md:mt-0">
+                    <label for="tooling" class="block text-sm font-medium text-gray-700">Tipo di Utensile</label>
+                    <div class="relative mt-1">
+                        <select id="tooling" name="tooling" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Seleziona...</option>
+                            <option value="Senza Punzoni">Senza Punzoni</option>
+                            <option value="Con Punzoni">Con Punzoni</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="plungerTimeContainer" class="hidden">
+                <label for="plungerTime" class="block text-sm font-medium text-gray-700">Tempo del Punzone (s)</label>
+                <div class="relative mt-1">
+                    <input type="number" id="plungerTime" name="plungerTime" step="0.1" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Esempio: 1.5">
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row md:space-x-4">
+                <div class="flex-1">
+                    <label for="pressure" class="block text-sm font-medium text-gray-700">Pressione (bar)</label>
+                    <div class="relative mt-1">
+                        <input type="number" id="pressure" name="pressure" step="0.1" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Esempio: 4.5">
+                    </div>
+                </div>
+                <div class="flex-1 mt-4 md:mt-0">
+                    <label for="pressureTime" class="block text-sm font-medium text-gray-700">Tempo di Pressione (s)</label>
+                    <div class="relative mt-1">
+                        <input type="number" id="pressureTime" name="pressureTime" step="0.1" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Esempio: 2.0">
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row md:space-x-4">
+                <div class="flex-1">
+                    <label for="vacuum" class="block text-sm font-medium text-gray-700">Vuoto (mbar)</label>
+                    <div class="relative mt-1">
+                        <input type="number" id="vacuum" name="vacuum" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Esempio: 800">
+                    </div>
+                </div>
+                <div class="flex-1 mt-4 md:mt-0">
+                    <label for="vacuumTime" class="block text-sm font-medium text-gray-700">Tempo di Vuoto (s)</label>
+                    <div class="relative mt-1">
+                        <input type="number" id="vacuumTime" name="vacuumTime" step="0.1" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Esempio: 3.5">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Qualità</label>
+                <div class="mt-1 flex items-center space-x-1 star-rating" data-quality-value="0">
+                    <svg class="star h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-value="1"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.694h3.46c.969 0 1.371 1.24.588 1.81l-2.8 2.031a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.539 1.118l-2.8-2.031a1 1 0 00-1.176 0l-2.8 2.031c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.055 8.723c-.783-.57-.38-1.81.588-1.81h3.46a1 1 0 00.95-.694l1.07-3.292z"></path></svg>
+                    <svg class="star h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-value="2"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.694h3.46c.969 0 1.371 1.24.588 1.81l-2.8 2.031a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.539 1.118l-2.8-2.031a1 1 0 00-1.176 0l-2.8 2.031c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.055 8.723c-.783-.57-.38-1.81.588-1.81h3.46a1 1 0 00.95-.694l1.07-3.292z"></path></svg>
+                    <svg class="star h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-value="3"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.694h3.46c.969 0 1.371 1.24.588 1.81l-2.8 2.031a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.539 1.118l-2.8-2.031a1 1 0 00-1.176 0l-2.8 2.031c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.055 8.723c-.783-.57-.38-1.81.588-1.81h3.46a1 1 0 00.95-.694l1.07-3.292z"></path></svg>
+                    <svg class="star h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-value="4"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.694h3.46c.969 0 1.371 1.24.588 1.81l-2.8 2.031a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.539 1.118l-2.8-2.031a1 1 0 00-1.176 0l-2.8 2.031c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.055 8.723c-.783-.57-.38-1.81.588-1.81h3.46a1 1 0 00.95-.694l1.07-3.292z"></path></svg>
+                    <svg class="star h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-value="5"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.694h3.46c.969 0 1.371 1.24.588 1.81l-2.8 2.031a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.539 1.118l-2.8-2.031a1 1 0 00-1.176 0l-2.8 2.031c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.055 8.723c-.783-.57-.38-1.81.588-1.81h3.46a1 1 0 00.95-.694l1.07-3.292z"></path></svg>
+                </div>
+                <input type="hidden" id="quality" name="quality" value="0">
+                <div class="mt-2 text-xs text-gray-500">
+                    <span id="qualityDescription">Clicca sulle stelle per valutare la qualità.</span>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-4 mt-4">
+                <button type="button" id="clearBtn" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Cancella</button>
+                <button type="submit" id="submitBtn" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Aggiungi Prova</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Analisi e suggerimenti -->
+    <div class="space-y-4">
+        <h2 class="text-2xl font-bold text-center text-indigo-700 mt-8">Analisi e Suggerimenti</h2>
+        <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+            <div class="flex-1 bg-gray-100 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Analisi Media</h3>
+                <div class="flex flex-col md:flex-row md:space-x-4">
+                    <div class="flex-1">
+                        <label for="analysisComposition" class="block text-sm font-medium text-gray-700">Composizione</label>
+                        <select id="analysisComposition" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Seleziona...</option>
+                        </select>
+                    </div>
+                </div>
+                <p id="avgResults" class="mt-4 text-sm text-gray-700"></p>
+            </div>
+
+            <div class="flex-1 bg-gray-100 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Suggerimento di Formatura</h3>
+                <div class="flex flex-col md:flex-row md:space-x-4">
+                    <div class="flex-1">
+                        <label for="suggestionComposition" class="block text-sm font-medium text-gray-700">Composizione</label>
+                        <select id="suggestionComposition" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Seleziona...</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="suggestionThickness" class="block text-sm font-medium text-gray-700">Spessore (µm)</label>
+                        <input type="number" id="suggestionThickness" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="flex-1 mt-4">
+                    <label for="suggestionFlexibility" class="block text-sm font-medium text-gray-700">Flessibilità</label>
+                    <select id="suggestionFlexibility" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Seleziona...</option>
+                        <option value="Rigido">Rigido</option>
+                        <option value="Flessibile">Flessibile</option>
+                    </select>
+                </div>
+                <div class="flex-1 mt-4">
+                    <label for="suggestionFormingType" class="block text-sm font-medium text-gray-700">Tipo di Formatura</label>
+                    <select id="suggestionFormingType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Seleziona...</option>
+                        <option value="Vacuum">Vacuum</option>
+                        <option value="Pressure">Pressure</option>
+                    </select>
+                </div>
+                <div class="flex-1 mt-4">
+                    <label for="suggestionTooling" class="block text-sm font-medium text-gray-700">Tipo di Utensile</label>
+                    <select id="suggestionTooling" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Seleziona...</option>
+                        <option value="Senza Punzoni">Senza Punzoni</option>
+                        <option value="Con Punzoni">Con Punzoni</option>
+                    </select>
+                </div>
+                <button id="getSuggestionBtn" class="mt-4 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Ottieni Suggerimento</button>
+                <p id="suggestionResults" class="mt-4 text-sm text-gray-700"></p>
+                <div class="mt-4">
+                    <canvas id="suggestionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gestione dei film preferiti -->
+    <div class="space-y-4">
+        <h2 class="text-2xl font-bold text-center text-indigo-700 mt-8">I miei Film Preferiti</h2>
+        <div id="favoritesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Favorite films will be dynamically inserted here -->
+        </div>
+        <p id="noFavorites" class="text-center text-gray-500 hidden">Nessun film preferito salvato.</p>
+    </div>
+
+    <!-- Grafici -->
+    <div class="space-y-4">
+        <h2 class="text-2xl font-bold text-center text-indigo-700 mt-8">Rappresentazione Grafica</h2>
+        <div class="bg-gray-100 p-6 rounded-lg shadow-inner">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Grafico Spessore vs. Tipo di Formatura</h3>
+            <canvas id="thicknessChart"></canvas>
+        </div>
+        <div class="bg-gray-100 p-6 rounded-lg shadow-inner mt-4">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Distribuzione Qualità Prove</h3>
+            <canvas id="qualityChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Lista dei report -->
+    <div class="space-y-4">
+        <h2 class="text-2xl font-bold text-center text-indigo-700 mt-8">Storico Prove</h2>
+        <div class="flex items-center space-x-2">
+            <div class="relative flex-grow">
+                <input type="text" id="search" placeholder="Cerca report..." class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-4 pr-4">
+            </div>
+            <button id="viewToggleBtn" class="p-2 rounded-md shadow-sm text-gray-500 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg id="listIcon" class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
+                <svg id="gridIcon" class="h-6 w-6 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm0 8a2 2 0 012-2h10a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2z" clip-rule="evenodd" /></svg>
+            </button>
+        </div>
+
+        <div id="reportList" class="space-y-4 mt-4">
+            <!-- Reports will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Guida ai Film Plastici -->
+    <div class="bg-gray-50 rounded-lg p-6 mt-8">
+        <h2 class="text-2xl font-bold text-indigo-700 mb-4 text-center md:text-left">Guida ai Film Plastici per Termoformatura</h2>
+        <p class="text-gray-600 mb-6 text-center md:text-left">Una guida rapida sui tipi di plastica più comuni, le loro temperature di lavorazione e gli spessori tipici.</p>
+
+        <div class="overflow-x-auto">
+            <table class="w-full table-auto border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 border-b-2 border-gray-200">
+                        <th class="py-3 px-2 text-left text-sm font-semibold text-gray-600">Materiale</th>
+                        <th class="py-3 px-2 text-left text-sm font-semibold text-gray-600">Spessore Tipico</th>
+                        <th class="py-3 px-2 text-left text-sm font-semibold text-gray-600">Temp. Termoform.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors duration-200">
+                        <td class="py-2 px-2 text-sm font-medium">PET</td>
+                        <td class="py-2 px-2 text-sm text-gray-700">200-1200µm</td>
+                        <td class="py-2 px-2 text-sm text-gray-700">90-120°C</td>
+                    </tr>
+                    <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors duration-200">
+                        <td class="py-2 px-2 text-sm font-medium">PVC</td>
+                        <td class="py-2 px-2 text-sm text-gray-700">Varia ampiamente</td>
+                        <td class="py-2 px-2 text-sm text-gray-700">60-100°C (inizio deformazione)</td>
+                    </tr>
+                    <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors duration-200">
+                        <td class="py-2 px-2 text-sm font-medium">PP</td>
+                        <td class="py-2 px-2 text-sm text-gray-700">200-1200µm</td>
+                        <td class="py-2 px-2 text-sm text-gray-700">135-160°C</td>
+                    </tr>
+                    <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors duration-200">
+                        <td class="py-2 px-2 text-sm font-medium">PS</td>
+                        <td class="py-2 px-2 text-sm text-gray-700">Varia a seconda dell'uso</td>
+                        <td class="py-2 px-2 text-sm text-gray-700">150-204°C (flusso viscoso)</td>
+                    </tr>
+                    <tr class="hover:bg-gray-100 transition-colors duration-200">
+                        <td class="py-2 px-2 text-sm font-medium">ABS</td>
+                        <td class="py-2 px-2 text-sm text-gray-700">0.7-14 mm</td>
+                        <td class="py-2 px-2 text-sm text-gray-700">105-140°C</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pannello modale per l'esportazione e l'importazione -->
+    <div id="fileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-full">
+            <h3 class="text-xl font-semibold mb-4">Gestione Dati</h3>
+            <div class="space-y-4">
+                <button id="exportBtn" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Esporta Dati (JSON)</button>
+                <div>
+                    <label for="importFile" class="block text-sm font-medium text-gray-700 mb-1">Importa Dati (JSON)</label>
+                    <input type="file" id="importFile" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                </div>
+            </div>
+            <button id="closeModalBtn" class="mt-6 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-500 hover:bg-gray-600">Chiudi</button>
+        </div>
+    </div>
+
+    <!-- Pulsante per aprire il pannello modale -->
+    <div class="flex justify-center mt-8">
+        <button id="openFileModalBtn" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Gestisci Dati</button>
+    </div>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const films = JSON.parse(localStorage.getItem('films')) || [];
+    const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    const filmForm = document.getElementById('film-form');
+    const filmNameInput = document.getElementById('filmName');
+    const compositionInput = document.getElementById('composition');
+    const thicknessInput = document.getElementById('thickness');
+    const flexibilityInput = document.getElementById('flexibility');
+    const formingTypeInput = document.getElementById('formingType');
+    const toolingInput = document.getElementById('tooling');
+    const tempInput = document.getElementById('temp');
+    const pressureInput = document.getElementById('pressure');
+    const pressureTimeInput = document.getElementById('pressureTime');
+    const vacuumInput = document.getElementById('vacuum');
+    const vacuumTimeInput = document.getElementById('vacuumTime');
+    const plungerTimeInput = document.getElementById('plungerTime');
+    const plungerTimeContainer = document.getElementById('plungerTimeContainer');
+    const qualityInput = document.getElementById('quality');
+    const starRatingContainer = document.querySelector('.star-rating');
+    const stars = document.querySelectorAll('.star-rating .star');
+    const qualityDescription = document.getElementById('qualityDescription');
+    const submitBtn = document.getElementById('submitBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const reportList = document.getElementById('reportList');
+    const searchInput = document.getElementById('search');
+    const suggestionsList = document.getElementById('suggestions');
+    const analysisCompositionSelect = document.getElementById('analysisComposition');
+    const avgResults = document.getElementById('avgResults');
+    const suggestionCompositionSelect = document.getElementById('suggestionComposition');
+    const suggestionThicknessInput = document.getElementById('suggestionThickness');
+    const suggestionFlexibilitySelect = document.getElementById('suggestionFlexibility');
+    const suggestionFormingTypeSelect = document.getElementById('suggestionFormingType');
+    const suggestionToolingSelect = document.getElementById('suggestionTooling');
+    const getSuggestionBtn = document.getElementById('getSuggestionBtn');
+    const suggestionResults = document.getElementById('suggestionResults');
+    const openFileModalBtn = document.getElementById('openFileModalBtn');
+    const fileModal = document.getElementById('fileModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importFile = document.getElementById('importFile');
+    const favoritesList = document.getElementById('favoritesList');
+    const noFavorites = document.getElementById('noFavorites');
+    const toggleFavoritesBtn = document.getElementById('toggleFavorites');
+    const favoriteIconEmpty = document.getElementById('favorite-icon-empty');
+    const favoriteIconFilled = document.getElementById('favorite-icon-filled');
+    const viewToggleBtn = document.getElementById('viewToggleBtn');
+    const listIcon = document.getElementById('listIcon');
+    const gridIcon = document.getElementById('gridIcon');
+
+    let currentView = 'list';
+    let isEditing = false;
+    let currentEditIndex = null;
+    let thicknessChart, suggestionChart, qualityChart;
+
+    const qualityDescriptions = {
+        '0': 'Clicca sulle stelle per valutare la qualità.',
+        '1': '⭐ Pessima: La prova ha fallito, risultato inutilizzabile.',
+        '2': '⭐⭐ Scarsa: Molti difetti, risultato di bassa qualità.',
+        '3': '⭐⭐⭐ Media: Accettabile, ma presenta alcuni difetti minori.',
+        '4': '⭐⭐⭐⭐ Buona: Ottima riuscita con pochi o nessun difetto.',
+        '5': '⭐⭐⭐⭐⭐ Eccellente: Risultato perfetto, qualità massima.'
+    };
+
+    // Star rating functionality
+    stars.forEach(star => {
+        star.addEventListener('click', (e) => {
+            const value = e.currentTarget.dataset.value;
+            qualityInput.value = value;
+            updateStars(value);
+        });
+        star.addEventListener('mouseenter', (e) => {
+            const value = e.currentTarget.dataset.value;
+            qualityDescription.textContent = qualityDescriptions[value];
+            updateStars(value, true);
+        });
+        star.addEventListener('mouseleave', () => {
+            const currentValue = qualityInput.value;
+            qualityDescription.textContent = qualityDescriptions[currentValue];
+            updateStars(currentValue);
+        });
+    });
+
+    const updateStars = (value, hover = false) => {
+        stars.forEach(star => {
+            if (star.dataset.value <= value) {
+                star.classList.add('filled');
+            } else {
+                star.classList.remove('filled');
+            }
+        });
+        if (!hover) {
+            starRatingContainer.dataset.qualityValue = value;
+        }
+    };
+
+    // Show/hide plunger time input based on tooling selection
+    toolingInput.addEventListener('change', () => {
+        if (toolingInput.value === 'Con Punzoni') {
+            plungerTimeContainer.classList.remove('hidden');
+        } else {
+            plungerTimeContainer.classList.add('hidden');
+            plungerTimeInput.value = ''; // Clear value when hidden
+        }
+    });
+
+    // Function to clear all form fields
+    const clearForm = () => {
+        filmNameInput.value = '';
+        compositionInput.value = '';
+        thicknessInput.value = '';
+        flexibilityInput.value = '';
+        formingTypeInput.value = '';
+        toolingInput.value = '';
+        tempInput.value = '';
+        pressureInput.value = '';
+        pressureTimeInput.value = '';
+        vacuumInput.value = '';
+        vacuumTimeInput.value = '';
+        plungerTimeInput.value = '';
+        plungerTimeContainer.classList.add('hidden');
+        qualityInput.value = '0';
+        updateStars(0);
+        qualityDescription.textContent = qualityDescriptions['0'];
+        submitBtn.textContent = 'Aggiungi Prova';
+        isEditing = false;
+        currentEditIndex = null;
+    };
+
+    // Function to save films and favorites to local storage
+    const saveFilms = () => {
+        localStorage.setItem('films', JSON.stringify(films));
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        updateUI();
+    };
+
+    // Function to create and update charts
+    const createOrUpdateCharts = () => {
+        createOrUpdateThicknessChart();
+        createOrUpdateQualityChart();
+    };
+
+    const createOrUpdateThicknessChart = () => {
+        const thicknessCounts = {};
+        films.forEach(film => {
+            if (film.thickness) {
+                const thickness = film.thickness;
+                const type = film.formingType || 'Sconosciuto';
+                if (!thicknessCounts[thickness]) {
+                    thicknessCounts[thickness] = { Vacuum: 0, Pressure: 0 };
+                }
+                thicknessCounts[thickness][type]++;
+            }
+        });
+        const thicknesses = Object.keys(thicknessCounts).sort((a, b) => a - b);
+        const vacuumData = thicknesses.map(t => thicknessCounts[t].Vacuum);
+        const pressureData = thicknesses.map(t => thicknessCounts[t].Pressure);
+        const ctx = document.getElementById('thicknessChart').getContext('2d');
+        if (thicknessChart) {
+            thicknessChart.destroy();
+        }
+        thicknessChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: thicknesses,
+                datasets: [
+                    {
+                        label: 'Vacuum',
+                        data: vacuumData,
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Pressure',
+                        data: pressureData,
+                        backgroundColor: 'rgba(168, 85, 247, 0.6)',
+                        borderColor: 'rgba(168, 85, 247, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { stacked: true, title: { display: true, text: 'Spessore (µm)' } },
+                    y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Numero di Prove' } }
+                }
+            }
+        });
+    };
+
+    const createOrUpdateQualityChart = () => {
+        const qualityCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+        films.forEach(film => {
+            if (film.quality in qualityCounts) {
+                qualityCounts[film.quality]++;
+            }
+        });
+
+        const ctx = document.getElementById('qualityChart').getContext('2d');
+        if (qualityChart) {
+            qualityChart.destroy();
+        }
+        qualityChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(qualityCounts).map(q => `${q} stelle`),
+                datasets: [{
+                    data: Object.values(qualityCounts),
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.8)',  // Red for 1 star
+                        'rgba(245, 158, 11, 0.8)', // Orange for 2 stars
+                        'rgba(59, 130, 246, 0.8)', // Blue for 3 stars
+                        'rgba(22, 163, 74, 0.8)',  // Green for 4 stars
+                        'rgba(34, 197, 94, 0.8)'   // Emerald for 5 stars
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 0;
+                                return `${label}: ${value} prove (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    };
+
+    // Function to update the reports list and charts
+    const updateUI = () => {
+        updateFavoritesList();
+        reportList.innerHTML = '';
+        const searchTerm = searchInput.value.toLowerCase();
+        const filteredFilms = films.filter(film =>
+            film.name.toLowerCase().includes(searchTerm) ||
+            film.composition.toLowerCase().includes(searchTerm) ||
+            (film.flexibility && film.flexibility.toLowerCase().includes(searchTerm)) ||
+            (film.formingType && film.formingType.toLowerCase().includes(searchTerm))
+        );
+
+        if (filteredFilms.length === 0 && searchTerm !== '') {
+            reportList.innerHTML = `<p class="text-center text-gray-500">Nessun report trovato.</p>`;
+        } else if (filteredFilms.length === 0) {
+            reportList.innerHTML = `<p class="text-center text-gray-500">Inizia aggiungendo una prova di termoformatura!</p>`;
+        }
+
+        const listContainer = document.createElement('div');
+        listContainer.className = currentView === 'list' ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+        
+        filteredFilms.forEach((film, index) => {
+            let itemHtml;
+            const starsHtml = '<div class="flex items-center space-x-1">' +
+                Array.from({length: 5}, (_, i) => `<svg class="h-4 w-4 ${i < film.quality ? 'text-yellow-400' : 'text-gray-400'}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.694h3.46c.969 0 1.371 1.24.588 1.81l-2.8 2.031a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.539 1.118l-2.8-2.031a1 1 0 00-1.176 0l-2.8 2.031c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.055 8.723c-.783-.57-.38-1.81.588-1.81h3.46a1 1 0 00.95-.694l1.07-3.292z"></path></svg>`).join('') +
+                '</div>';
+            
+            if (currentView === 'list') {
+                itemHtml = `
+                    <div class="bg-gray-100 rounded-lg p-4 shadow-sm space-y-2">
+                        <div class="flex justify-between items-center cursor-pointer film-card" data-index="${index}">
+                            <h3 class="text-md font-semibold text-gray-800">${index + 1}. ${film.name} - ${film.composition}</h3>
+                            <div class="flex items-center space-x-2">
+                                ${starsHtml}
+                                <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200 expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                        <div class="hidden expandable-content">
+                            <div class="mt-2 text-sm text-gray-700 space-y-1">
+                                <p><strong>Spessore:</strong> ${film.thickness} µm</p>
+                                <p><strong>Flessibilità:</strong> ${film.flexibility}</p>
+                                <p><strong>Tipo di Formatura:</strong> ${film.formingType || 'N/A'}</p>
+                                <p><strong>Tipo di Utensile:</strong> ${film.tooling || 'N/A'}</p>
+                                <p><strong>Temperatura:</strong> ${film.temp} °C</p>
+                                <p><strong>Pressione:</strong> ${film.pressure} bar</p>
+                                <p><strong>Tempo Pressione:</strong> ${film.pressureTime} s</p>
+                                <p><strong>Vuoto:</strong> ${film.vacuum} mbar</p>
+                                <p><strong>Tempo Vuoto:</strong> ${film.vacuumTime} s</p>
+                                ${film.plungerTime !== null ? `<p><strong>Tempo del Punzone:</strong> ${film.plungerTime} s</p>` : ''}
+                                <p><strong>Qualità:</strong> ${qualityDescriptions[film.quality]}</p>
+                            </div>
+                            <div class="mt-4 flex space-x-2">
+                                <button class="edit-btn py-1 px-3 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" data-index="${index}">Modifica</button>
+                                <button class="delete-btn py-1 px-3 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" data-index="${index}">Elimina</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else { // 'card' view
+                itemHtml = `
+                    <div class="bg-gray-100 rounded-lg p-4 shadow-sm space-y-2">
+                        <h3 class="text-md font-semibold text-gray-800">${film.name} - ${film.composition}</h3>
+                        <div class="mt-2 text-sm text-gray-700 space-y-1">
+                            <p><strong>Spessore:</strong> ${film.thickness} µm</p>
+                            <p><strong>Flessibilità:</strong> ${film.flexibility}</p>
+                            <p><strong>Temp:</strong> ${film.temp} °C</p>
+                            <p><strong>Qualità:</strong> ${starsHtml}</p>
+                        </div>
+                        <div class="mt-4 flex space-x-2">
+                            <button class="edit-btn py-1 px-3 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" data-index="${index}">Modifica</button>
+                            <button class="delete-btn py-1 px-3 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" data-index="${index}">Elimina</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            listContainer.innerHTML += itemHtml;
+        });
+
+        reportList.appendChild(listContainer);
+        
+        if (currentView === 'list') {
+             document.querySelectorAll('.film-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.edit-btn') || e.target.closest('.delete-btn')) return;
+                    const content = card.nextElementSibling;
+                    const icon = card.querySelector('.expand-icon');
+                    content.classList.toggle('hidden');
+                    icon.classList.toggle('rotate-180');
+                });
+            });
+        }
+       
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const index = e.target.dataset.index;
+                editFilm(index);
+                // Scroll to the top of the page after clicking edit
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const index = e.target.dataset.index;
+                deleteFilm(index);
+            });
+        });
+
+        updateAnalysisSelects();
+        createOrUpdateCharts();
+    };
+
+    // Function to handle form submission
+    filmForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const filmName = filmNameInput.value.trim();
+        const composition = compositionInput.value.trim();
+        const thickness = thicknessInput.value.trim();
+        const flexibility = flexibilityInput.value;
+        const formingType = formingTypeInput.value;
+        const tooling = toolingInput.value;
+        const temp = tempInput.value.trim();
+        const pressure = pressureInput.value.trim();
+        const pressureTime = pressureTimeInput.value.trim();
+        const vacuum = vacuumInput.value.trim();
+        const vacuumTime = vacuumTimeInput.value.trim();
+        const plungerTime = plungerTimeInput.value.trim();
+        const quality = qualityInput.value;
+
+        if (!filmName || !composition || !thickness || !flexibility || !formingType || !tooling || !temp || !pressure || !pressureTime || !vacuum || !vacuumTime || quality === '0' || (tooling === 'Con Punzoni' && !plungerTime)) {
+            alert("Per favore, compila tutti i campi.");
+            return;
+        }
+
+        const newFilm = {
+            name: filmName,
+            composition: composition,
+            thickness: parseInt(thickness),
+            flexibility: flexibility,
+            formingType: formingType,
+            tooling: tooling,
+            temp: parseInt(temp),
+            pressure: parseFloat(pressure),
+            pressureTime: parseFloat(pressureTime),
+            vacuum: parseInt(vacuum),
+            vacuumTime: parseFloat(vacuumTime),
+            plungerTime: tooling === 'Con Punzoni' ? parseFloat(plungerTime) : null,
+            quality: parseInt(quality)
+        };
+
+        if (isEditing) {
+            films[currentEditIndex] = newFilm;
+            alert("Report modificato con successo!");
+        } else {
+            films.push(newFilm);
+            alert("Report aggiunto con successo!");
+        }
+
+        saveFilms();
+        clearForm();
+    });
+
+    // Function to handle editing
+    const editFilm = (index) => {
+        const film = films[index];
+        filmNameInput.value = film.name;
+        compositionInput.value = film.composition;
+        thicknessInput.value = film.thickness;
+        flexibilityInput.value = film.flexibility;
+        formingTypeInput.value = film.formingType;
+        toolingInput.value = film.tooling;
+        tempInput.value = film.temp;
+        pressureInput.value = film.pressure;
+        pressureTimeInput.value = film.pressureTime;
+        vacuumInput.value = film.vacuum;
+        vacuumTimeInput.value = film.vacuumTime;
+        plungerTimeInput.value = film.plungerTime || '';
+        if (film.tooling === 'Con Punzoni') {
+            plungerTimeContainer.classList.remove('hidden');
+        } else {
+            plungerTimeContainer.classList.add('hidden');
+        }
+        qualityInput.value = film.quality;
+        updateStars(film.quality);
+
+        submitBtn.textContent = 'Salva Modifiche';
+        isEditing = true;
+        currentEditIndex = index;
+    };
+
+    // Function to handle deletion
+    const deleteFilm = (index) => {
+        if (confirm("Sei sicuro di voler eliminare questo report?")) {
+            films.splice(index, 1);
+            saveFilms();
+        }
+    };
+
+    // Handle form clearing
+    clearBtn.addEventListener('click', clearForm);
+
+    // Live search functionality
+    searchInput.addEventListener('input', updateUI);
+
+    // Autocomplete for film name
+    filmNameInput.addEventListener('input', () => {
+        const query = filmNameInput.value.toLowerCase();
+        if (query.length > 0) {
+            const uniqueFilms = [...new Set(films.map(film => film.name))].filter(name => name.toLowerCase().includes(query));
+            displaySuggestions(uniqueFilms);
+        } else {
+            suggestionsList.classList.add('hidden');
+        }
+    });
+
+    const displaySuggestions = (uniqueFilms) => {
+        suggestionsList.innerHTML = '';
+        if (uniqueFilms.length > 0) {
+            suggestionsList.classList.remove('hidden');
+            uniqueFilms.forEach(filmName => {
+                const li = document.createElement('li');
+                li.textContent = filmName;
+                li.className = 'p-2 cursor-pointer hover:bg-gray-200';
+                li.addEventListener('click', () => {
+                    filmNameInput.value = filmName;
+                    const selectedFilm = films.find(film => film.name === filmName);
+                    if (selectedFilm) {
+                        compositionInput.value = selectedFilm.composition;
+                        flexibilityInput.value = selectedFilm.flexibility;
+                    }
+                    suggestionsList.classList.add('hidden');
+                });
+                suggestionsList.appendChild(li);
+            });
+        } else {
+            suggestionsList.classList.add('hidden');
+        }
+    };
+
+    filmNameInput.addEventListener('blur', () => {
+        setTimeout(() => suggestionsList.classList.add('hidden'), 200);
+    });
+    filmNameInput.addEventListener('focus', () => {
+        const query = filmNameInput.value.toLowerCase();
+        const uniqueFilms = [...new Set(films.map(film => film.name))].filter(name => name.toLowerCase().includes(query));
+        displaySuggestions(uniqueFilms);
+    });
+
+    // Favorite functionality
+    toggleFavoritesBtn.addEventListener('click', () => {
+        const filmName = filmNameInput.value.trim();
+        const composition = compositionInput.value.trim();
+        if (!filmName || !composition) {
+            alert("Per favore, inserisci un nome film e una composizione per salvarlo.");
+            return;
+        }
+
+        const index = favorites.findIndex(f => f.name === filmName && f.composition === composition);
+        if (index !== -1) {
+            favorites.splice(index, 1);
+            alert("Film rimosso dai preferiti!");
+        } else {
+            favorites.push({ name: filmName, composition: composition, flexibility: flexibilityInput.value });
+            alert("Film aggiunto ai preferiti!");
+        }
+        saveFilms();
+    });
+
+    const updateFavoriteIcon = () => {
+        const filmName = filmNameInput.value.trim();
+        const composition = compositionInput.value.trim();
+        const isFavorite = favorites.some(f => f.name === filmName && f.composition === composition);
+        if (isFavorite) {
+            favoriteIconEmpty.classList.add('hidden');
+            favoriteIconFilled.classList.remove('hidden');
+        } else {
+            favoriteIconEmpty.classList.remove('hidden');
+            favoriteIconFilled.classList.add('hidden');
+        }
+    };
+
+    filmNameInput.addEventListener('input', updateFavoriteIcon);
+    compositionInput.addEventListener('input', updateFavoriteIcon);
+
+    const updateFavoritesList = () => {
+        favoritesList.innerHTML = '';
+        if (favorites.length === 0) {
+            noFavorites.classList.remove('hidden');
+        } else {
+            noFavorites.classList.add('hidden');
+            favorites.forEach((fav, index) => {
+                const favCard = document.createElement('div');
+                favCard.className = 'bg-gray-100 rounded-lg p-4 shadow-sm flex justify-between items-center';
+                favCard.innerHTML = `
+                    <div>
+                        <h4 class="font-semibold text-gray-800">${fav.name}</h4>
+                        <p class="text-sm text-gray-600">${fav.composition}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="use-fav-btn text-indigo-600 hover:text-indigo-800" data-index="${index}" title="Usa questo preferito">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM10 13a2 2 0 100 4 2 2 0 000-4z" clip-rule="evenodd" /></svg>
+                        </button>
+                        <button class="delete-fav-btn text-red-600 hover:text-red-800" data-index="${index}" title="Elimina preferito">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 011 1v5a1 1 0 11-2 0V9a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                `;
+                favoritesList.appendChild(favCard);
+            });
+
+            document.querySelectorAll('.use-fav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.currentTarget.dataset.index;
+                    const fav = favorites[index];
+                    filmNameInput.value = fav.name;
+                    compositionInput.value = fav.composition;
+                    if (fav.flexibility) flexibilityInput.value = fav.flexibility;
+                    updateFavoriteIcon();
+                });
+            });
+            document.querySelectorAll('.delete-fav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.currentTarget.dataset.index;
+                    favorites.splice(index, 1);
+                    saveFilms();
+                });
+            });
+        }
+    };
+
+    // Analisi media
+    const updateAnalysisSelects = () => {
+        const compositions = [...new Set(films.map(f => f.composition))];
+        analysisCompositionSelect.innerHTML = '<option value="">Seleziona...</option>';
+        suggestionCompositionSelect.innerHTML = '<option value="">Seleziona...</option>';
+        compositions.forEach(comp => {
+            const option1 = document.createElement('option');
+            option1.value = comp;
+            option1.textContent = comp;
+            analysisCompositionSelect.appendChild(option1);
+            const option2 = document.createElement('option');
+            option2.value = comp;
+            option2.textContent = comp;
+            suggestionCompositionSelect.appendChild(option2);
+        });
+    };
+
+    analysisCompositionSelect.addEventListener('change', () => {
+        const selectedComposition = analysisCompositionSelect.value;
+        if (selectedComposition) {
+            const filteredFilms = films.filter(f => f.composition === selectedComposition);
+            const totalTemp = filteredFilms.reduce((sum, film) => sum + film.temp, 0);
+            const totalQuality = filteredFilms.reduce((sum, film) => sum + film.quality, 0);
+            const avgTemp = (totalTemp / filteredFilms.length).toFixed(2);
+            const avgQuality = (totalQuality / filteredFilms.length).toFixed(2);
+            avgResults.innerHTML = `
+                <p><strong>Composizione:</strong> ${selectedComposition}</p>
+                <p><strong>Prove registrate:</strong> ${filteredFilms.length}</p>
+                <p><strong>Temperatura media:</strong> ${avgTemp} °C</p>
+                <p><strong>Qualità media:</strong> ${avgQuality} stelle</p>
+            `;
+        } else {
+            avgResults.innerHTML = '';
+        }
+    });
+
+    // Suggerimento di formatura
+    getSuggestionBtn.addEventListener('click', () => {
+        const selectedComposition = suggestionCompositionSelect.value;
+        const desiredThickness = parseInt(suggestionThicknessInput.value);
+        const desiredFlexibility = suggestionFlexibilitySelect.value;
+        const desiredFormingType = suggestionFormingTypeSelect.value;
+        const desiredTooling = suggestionToolingSelect.value;
+
+        if (!selectedComposition || isNaN(desiredThickness) || !desiredFlexibility || !desiredFormingType || !desiredTooling) {
+            alert("Per favore, seleziona una composizione, uno spessore, una flessibilità, un tipo di formatura e un tipo di utensile.");
+            return;
+        }
+        
+        const filteredFilms = films.filter(f => 
+            f.composition === selectedComposition &&
+            f.flexibility === desiredFlexibility &&
+            f.formingType === desiredFormingType &&
+            f.tooling === desiredTooling
+        );
+
+        if (filteredFilms.length === 0) {
+            suggestionResults.innerHTML = `<p class="text-red-600">Nessun dato trovato con queste specifiche. Non è possibile fornire un suggerimento.</p>`;
+            if (suggestionChart) suggestionChart.destroy();
+            return;
+        }
+
+        filteredFilms.sort((a, b) => Math.abs(a.thickness - desiredThickness) - Math.abs(b.thickness - desiredThickness));
+        const bestMatches = filteredFilms.slice(0, 3);
+        
+        const avgTemp = (bestMatches.reduce((sum, film) => sum + film.temp, 0) / bestMatches.length).toFixed(2);
+        const avgPressure = (bestMatches.reduce((sum, film) => sum + film.pressure, 0) / bestMatches.length).toFixed(2);
+        const avgPressureTime = (bestMatches.reduce((sum, film) => sum + film.pressureTime, 0) / bestMatches.length).toFixed(2);
+        const avgVacuum = (bestMatches.reduce((sum, film) => sum + film.vacuum, 0) / bestMatches.length).toFixed(2);
+        const avgVacuumTime = (bestMatches.reduce((sum, film) => sum + film.vacuumTime, 0) / bestMatches.length).toFixed(2);
+        const avgPlungerTime = (bestMatches.reduce((sum, film) => sum + (film.plungerTime || 0), 0) / bestMatches.length).toFixed(2);
+
+        suggestionResults.innerHTML = `
+            <p><strong>Suggerimento basato su ${bestMatches.length} prove simili:</strong></p>
+            <p><strong>Temperatura suggerita:</strong> ${avgTemp} °C</p>
+            <p><strong>Pressione suggerita:</strong> ${avgPressure} bar</p>
+            <p><strong>Tempo di pressione suggerito:</strong> ${avgPressureTime} s</p>
+            <p><strong>Vuoto suggerito:</strong> ${avgVacuum} mbar</p>
+            <p><strong>Tempo di vuoto suggerito:</strong> ${avgVacuumTime} s</p>
+            ${desiredTooling === 'Con Punzoni' ? `<p><strong>Tempo del Punzone suggerito:</strong> ${avgPlungerTime} s</p>` : ''}
+            <p><strong>Qualità media attesa:</strong> ${bestMatches.reduce((sum, film) => sum + film.quality, 0) / bestMatches.length} stelle</p>
+        `;
+
+        const labels = ['Temperatura', 'Pressione', 'Tempo Pressione', 'Vuoto', 'Tempo Vuoto'];
+        const data = [avgTemp, avgPressure, avgPressureTime, avgVacuum, avgVacuumTime];
+        if (desiredTooling === 'Con Punzoni') {
+            labels.push('Tempo Punzone');
+            data.push(avgPlungerTime);
+        }
+
+        const ctx = document.getElementById('suggestionChart').getContext('2d');
+        if (suggestionChart) {
+            suggestionChart.destroy();
+        }
+
+        suggestionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Valori Suggeriti',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.6)',
+                        'rgba(168, 85, 247, 0.6)',
+                        'rgba(245, 158, 11, 0.6)',
+                        'rgba(22, 163, 74, 0.6)',
+                        'rgba(239, 68, 68, 0.6)',
+                        'rgba(75, 192, 192, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(168, 85, 247, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(22, 163, 74, 1)',
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Valore'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: 'Suggerimento di Valori vs. Dati Esistenti' }
+                }
+            }
+        });
+    });
+
+    // File handling
+    openFileModalBtn.addEventListener('click', () => {
+        fileModal.classList.remove('hidden');
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        fileModal.classList.add('hidden');
+    });
+
+    exportBtn.addEventListener('click', () => {
+        const dataStr = JSON.stringify({ films, favorites }, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'termoformatura_reports.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    importFile.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if (importedData.films && Array.isArray(importedData.films) && importedData.favorites && Array.isArray(importedData.favorites)) {
+                        films.splice(0, films.length, ...importedData.films);
+                        favorites.splice(0, favorites.length, ...importedData.favorites);
+                        saveFilms();
+                        alert("Dati importati con successo!");
+                        fileModal.classList.add('hidden');
+                    } else {
+                        alert("File non valido. Si prega di importare un file JSON con un array di report.");
+                    }
+                } catch (error) {
+                    alert("Errore durante l'importazione del file. Assicurati che il formato sia corretto.");
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    // Toggle view
+    viewToggleBtn.addEventListener('click', () => {
+        currentView = currentView === 'list' ? 'card' : 'list';
+        listIcon.classList.toggle('hidden', currentView === 'card');
+        gridIcon.classList.toggle('hidden', currentView === 'list');
+        updateUI();
+    });
+
+    // Initial data load
+    updateUI();
+</script>
+
+</body>
+</html>
+
